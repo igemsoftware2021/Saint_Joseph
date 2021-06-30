@@ -1,3 +1,4 @@
+# Warning this code is poorly written, it was written in 5 minutes, beware!
 # iGEM Wiki Test Server
 This tool allows you to develop and test locally your wiki with template system of iGEM.
 
