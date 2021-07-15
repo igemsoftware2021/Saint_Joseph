@@ -47,7 +47,7 @@ For this example let's say this is your wiki folder
 <html>
      <body>
           <h1>Hello iGEM!</h1>
-          {{ Template/Test }}
+          {{ Template:TEAM_NAME/Test }}
      </body>
 </html>
 ```
