@@ -16,6 +16,5 @@
 
      topmenu.setAttribute("style", "position: fixed; width: 100%; top: 0px; left: 0px; height: 16px; background-color: #383838; border-bottom: 2px solid black; z-index: 9999;")
 
-     document.body.prepend(topmenu)
-
+     window.addEventListener("load", () => document.body.prepend(topmenu))
 })();
