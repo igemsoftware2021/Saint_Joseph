@@ -23,7 +23,10 @@ app.get("*", (req, res, next) => {
 		res.type("html").send(inject(render(path.join(WIKI_DIR, "Landing.html"))))
 	} else if (req.path.startsWith(`/Team:${TEAM_NAME}`) && fs.existsSync(path.join(WIKI_DIR, req.path.substr(6 + TEAM_NAME.length) + ".html"))) {
 		res.type("html").send(inject(render(path.join(WIKI_DIR, req.path.substr(6 + TEAM_NAME.length) + ".html"))))
-	} else next()
+	} else if (req.query?.action === "raw") {
+		res.type(req.query.ctype as string || "text/html").send(fs.readFileSync(path.join(WIKI_DIR, req.path.substr(6 + TEAM_NAME.length) + ".html")))
+	}
+	else next()
 })
 
 app.use(`/Team:${TEAM_NAME}`, express.static(WIKI_DIR))
