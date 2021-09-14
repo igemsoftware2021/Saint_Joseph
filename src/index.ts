@@ -23,10 +23,16 @@ app.get("*", (req, res, next) => {
 		res.type("html").send(inject(render(path.join(WIKI_DIR, "Landing.html"))))
 	} else if (req.path.startsWith(`/Team:${TEAM_NAME}`) && fs.existsSync(path.join(WIKI_DIR, req.path.substr(6 + TEAM_NAME.length) + ".html"))) {
 		res.type("html").send(inject(render(path.join(WIKI_DIR, req.path.substr(6 + TEAM_NAME.length) + ".html"))))
-	} else if (req.query?.action === "raw") {
-		res.type(req.query.ctype as string || "text/html").send(fs.readFileSync(path.join(WIKI_DIR, req.path.substr(6 + TEAM_NAME.length) + ".html")))
 	}
 	else next()
+})
+
+app.get("/wiki/index.php", (req, res) => {
+	if (req.query?.action === "raw" && req.query.title && (req.query.title as string).startsWith(`Template:${TEAM_NAME}`)) {
+		const filepath = path.join(WIKI_DIR, "Templates", (req.query.title as string).substr(`Template:${TEAM_NAME}`.length) + ".html")
+		if (fs.existsSync(filepath)) res.type(req.query.ctype as string || "text/html").send(fs.readFileSync(filepath))
+		else res.status(404).send()
+	}
 })
 
 app.use(`/Team:${TEAM_NAME}`, express.static(WIKI_DIR))
@@ -36,10 +42,16 @@ app.get("/socket.js", (req, res) => {
 })
 
 
-fs.readdirSync(path.join(WIKI_DIR, "Templates")).forEach(x => registerTemplate(path.join(WIKI_DIR, "Templates", x)))
+const registerDir = (x: string): void => fs.statSync(path.join(WIKI_DIR, "Templates", x)).isDirectory() ?
+	fs.readdirSync(path.join(WIKI_DIR, "Templates", x)).forEach(y => registerDir(path.join(x, y)))
+	: registerTemplate(path.join(WIKI_DIR, "Templates", x))
+
+fs.readdirSync(path.join(WIKI_DIR, "Templates")).forEach(registerDir)
+
 
 fs.watch(WIKI_DIR, { recursive: true }, (event, file) => {
 	if (event === "change" || event === "rename") {
+		if (fs.statSync(path.join(WIKI_DIR, file.toString())).isDirectory()) return
 		info("Changes detected on files")
 		if (path.dirname(file.toString()) === "Templates") registerTemplate(path.join(WIKI_DIR, file.toString()))
 		server.clients.forEach(x => x.send(1))
