@@ -1,4 +1,4 @@
-# iGEM Wiki Test Server
+# iGEM Mock MediaWiki Template Test Server
 This tool allows you to develop and test locally your wiki with template system of iGEM.
 
 ## Requirements
